@@ -3,6 +3,28 @@ from core.models.firewall_rule import FirewallRule
 
 class IptablesParser:
     def parse(self, text: str) -> List[FirewallRule]:
+        """
+        Parse iptables configuration text and extract firewall rules.
+        
+        Processes iptables rule definitions from text format, identifying tables,
+        chains, and individual rules while maintaining rule ordering within each chain.
+        
+        Args:
+            text (str): iptables configuration text containing rules in iptables-save format.
+        
+        Returns:
+            List[FirewallRule]: A list of parsed firewall rule objects extracted from the input text.
+        
+        Raises:
+            None explicitly, but may raise exceptions from _parse_tokens if invalid tokens are encountered.
+        
+        Notes:
+            - Skips empty lines and comments (lines starting with '#')
+            - Tables are identified by lines starting with '*'
+            - Rules are identified by lines starting with '-A'
+            - Rules are ordered sequentially within their respective chains
+            - Requires current_table to be set before processing rules
+        """
         rules = []
         current_table = None
         rule_order = {}
