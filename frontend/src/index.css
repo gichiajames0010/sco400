@@ -1,0 +1,185 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    --background: 220 20% 6%;
+    --foreground: 210 20% 92%;
+
+    --card: 220 18% 10%;
+    --card-foreground: 210 20% 92%;
+
+    --popover: 220 18% 10%;
+    --popover-foreground: 210 20% 92%;
+
+    --primary: 190 90% 50%;
+    --primary-foreground: 220 20% 6%;
+
+    --secondary: 220 16% 16%;
+    --secondary-foreground: 210 20% 85%;
+
+    --muted: 220 14% 18%;
+    --muted-foreground: 215 15% 55%;
+
+    --accent: 190 85% 45%;
+    --accent-foreground: 220 20% 6%;
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 210 20% 98%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 220 20% 6%;
+
+    --success: 142 70% 45%;
+    --success-foreground: 220 20% 6%;
+
+    --border: 220 14% 18%;
+    --input: 220 14% 14%;
+    --ring: 190 90% 50%;
+
+    --radius: 0.5rem;
+
+    --cyber-glow: 0 0 20px hsl(190 90% 50% / 0.3);
+    --cyber-glow-strong: 0 0 30px hsl(190 90% 50% / 0.5);
+
+    --sidebar-background: 220 18% 8%;
+    --sidebar-foreground: 210 20% 92%;
+    --sidebar-primary: 190 90% 50%;
+    --sidebar-primary-foreground: 220 20% 6%;
+    --sidebar-accent: 220 16% 14%;
+    --sidebar-accent-foreground: 210 20% 92%;
+    --sidebar-border: 220 14% 18%;
+    --sidebar-ring: 190 90% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+  .cyber-card {
+    @apply bg-card border border-border rounded-lg;
+    box-shadow: 0 4px 20px hsl(220 20% 4% / 0.5);
+  }
+
+  .cyber-card-glow {
+    @apply cyber-card;
+    box-shadow: var(--cyber-glow), 0 4px 20px hsl(220 20% 4% / 0.5);
+  }
+
+  .cyber-input {
+    @apply bg-input border border-border rounded-md text-foreground placeholder:text-muted-foreground;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary;
+    transition: all 0.2s ease;
+  }
+
+  .cyber-input:focus {
+    box-shadow: var(--cyber-glow);
+  }
+
+  .metric-card {
+    @apply cyber-card p-4 flex flex-col gap-2;
+    @apply hover:border-primary/50 transition-all duration-300;
+  }
+
+  .metric-card:hover {
+    box-shadow: var(--cyber-glow);
+  }
+
+  .rule-display {
+    @apply font-mono text-sm bg-input p-3 rounded border border-border;
+    @apply overflow-x-auto whitespace-pre;
+  }
+
+  .anomaly-panel {
+    @apply cyber-card overflow-hidden;
+  }
+
+  .anomaly-header {
+    @apply px-4 py-3 border-b border-border font-semibold flex items-center gap-2;
+  }
+
+  .anomaly-header-redundant {
+    @apply anomaly-header bg-warning/10 text-warning;
+  }
+
+  .anomaly-header-shadowed {
+    @apply anomaly-header bg-muted text-muted-foreground;
+  }
+
+  .anomaly-header-conflict {
+    @apply anomaly-header bg-destructive/10 text-destructive;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-primary-foreground font-semibold px-6 py-3 rounded-md;
+    @apply hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply transition-all duration-200 flex items-center justify-center gap-2;
+  }
+
+  .btn-primary:not(:disabled):hover {
+    box-shadow: var(--cyber-glow);
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground font-medium px-4 py-2 rounded-md;
+    @apply hover:bg-secondary/80 border border-border;
+    @apply transition-all duration-200 flex items-center justify-center gap-2;
+  }
+
+  .section-title {
+    @apply text-xl font-semibold text-foreground flex items-center gap-2;
+  }
+
+  .section-subtitle {
+    @apply text-muted-foreground text-sm;
+  }
+
+  .loading-spinner {
+    @apply w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin;
+  }
+}
+
+@layer utilities {
+  .text-gradient-cyber {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  .scrollbar-cyber {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
+
+  .scrollbar-cyber::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-cyber::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-cyber::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 3px;
+  }
+
+  .scrollbar-cyber::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+}
