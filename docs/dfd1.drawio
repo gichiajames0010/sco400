@@ -1,0 +1,88 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" version="29.3.4">
+  <diagram name="Page-1" id="J5zPIM0lewuAKdIWKqA0">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-3" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;labelPosition=center;verticalLabelPosition=middle;fontSize=22;" value="&lt;font style=&quot;font-size: 27px;&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;u style=&quot;&quot;&gt;Data Flow Diagram Level 1&lt;/u&gt;&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="630" x="40" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-12" edge="1" parent="1" source="I-3HbuSv7aYjDYywoOjd-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="I-3HbuSv7aYjDYywoOjd-5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=20;" value="System Administrator" vertex="1">
+          <mxGeometry height="60" width="400" x="120" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-13" edge="1" parent="1" source="I-3HbuSv7aYjDYywoOjd-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="I-3HbuSv7aYjDYywoOjd-6" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;" value="Rule Collection" vertex="1">
+          <mxGeometry height="50" width="330" x="155" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-14" edge="1" parent="1" source="I-3HbuSv7aYjDYywoOjd-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="I-3HbuSv7aYjDYywoOjd-7" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Rule Parsing &amp;amp; Structuring&lt;/font&gt;" vertex="1">
+          <mxGeometry height="50" width="330" x="155" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-15" edge="1" parent="1" source="I-3HbuSv7aYjDYywoOjd-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="I-3HbuSv7aYjDYywoOjd-8" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;" value="Anomaly Detection" vertex="1">
+          <mxGeometry height="50" width="330" x="155" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-16" edge="1" parent="1" source="I-3HbuSv7aYjDYywoOjd-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="I-3HbuSv7aYjDYywoOjd-9" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;" value="Optimization Engine" vertex="1">
+          <mxGeometry height="50" width="330" x="155" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;" value="Report Generation" vertex="1">
+          <mxGeometry height="50" width="330" x="155" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-10" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fontSize=20;" value="Database" vertex="1">
+          <mxGeometry height="230" width="180" x="640" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-17" edge="1" parent="1" source="I-3HbuSv7aYjDYywoOjd-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.632;entryDx=0;entryDy=0;entryPerimeter=0;" target="I-3HbuSv7aYjDYywoOjd-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-19" edge="1" parent="1" source="I-3HbuSv7aYjDYywoOjd-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="I-3HbuSv7aYjDYywoOjd-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-21" edge="1" parent="1" source="I-3HbuSv7aYjDYywoOjd-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" target="I-3HbuSv7aYjDYywoOjd-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-22" edge="1" parent="1" source="I-3HbuSv7aYjDYywoOjd-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" target="I-3HbuSv7aYjDYywoOjd-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-23" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="User Requests" vertex="1">
+          <mxGeometry height="30" width="110" x="310" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-24" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Raw Firewall Rules" vertex="1">
+          <mxGeometry height="30" width="140" x="310" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-25" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Structured Rules" vertex="1">
+          <mxGeometry height="30" width="120" x="310" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-26" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Anomaly Information" vertex="1">
+          <mxGeometry height="30" width="130" x="320" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-27" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Optimized Rules" vertex="1">
+          <mxGeometry height="30" width="110" x="315" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-29" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Analysis Reports and Optimization Results" vertex="1">
+          <mxGeometry height="30" width="275" x="70" y="750" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-31" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Parsed Rules" vertex="1">
+          <mxGeometry height="30" width="100" x="560" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-32" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Anomaly Logs" vertex="1">
+          <mxGeometry height="30" width="90" x="500" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="I-3HbuSv7aYjDYywoOjd-33" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Optimized Rule Sets" vertex="1">
+          <mxGeometry height="30" width="130" x="540" y="580" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
