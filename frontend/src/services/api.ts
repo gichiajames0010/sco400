@@ -11,12 +11,13 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
 // Types for the API response
 export interface RuleMetrics {
   total_rules: number;
-  redundant_count: number;
-  shadowed_count: number;
-  conflict_count: number;
-  optimized_count: number;
+  redundant_rules: number;
+  shadowed_rules: number;
+  conflicting_pairs: number;
+  optimized_rule_count: number;
   reduction_ratio: number;
 }
+
 
 export interface FirewallRule {
   order: number;
