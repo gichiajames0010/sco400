@@ -1,101 +1,85 @@
-"""Utilities for detecting conflicting firewall rules.
+"""Detect conflicting firewall rules.
 
-This module defines simple functions used to determine whether two
-`FirewallRule` objects may match the same packets and whether one rule
-logically covers another. The main exported helper is
-`detect_conflicting_rules`, which returns pairs of rules that are in the
-same table/chain, have different actions, and whose match sets overlap
-but neither rule fully covers the other (a likely conflict).
+Two rules conflict if they overlap in match criteria (IP/network,
+ports, protocol, interfaces) but have different actions, and neither
+fully shadows the other.
 """
 
-from typing import List, Tuple
+from typing import List, Tuple, Union
+import ipaddress
 from core.models.firewall_rule import FirewallRule
+from core.anomalies import shadowing
+
+
+def ip_overlap(net_a: Union[ipaddress.IPv4Network, None],
+               net_b: Union[ipaddress.IPv4Network, None]) -> bool:
+    """Return True if two networks overlap or either is unspecified."""
+    if net_a is None or net_b is None:
+        return True  # unspecified matches anything
+    return net_a.overlaps(net_b)
+
+
+def port_overlap(port_a: Union[int, Tuple[int, int], None],
+                 port_b: Union[int, Tuple[int, int], None]) -> bool:
+    """Return True if two ports or port ranges overlap or either is unspecified."""
+    if port_a is None or port_b is None:
+        return True
+
+    # Normalize single port to range
+    if isinstance(port_a, int):
+        port_a = (port_a, port_a)
+    if isinstance(port_b, int):
+        port_b = (port_b, port_b)
+
+    start_a, end_a = port_a
+    start_b, end_b = port_b
+
+    return not (end_a < start_b or end_b < start_a)
+
+
+def interfaces_overlap(iface_a: Union[str, None],
+                       iface_b: Union[str, None]) -> bool:
+    """Return True if interfaces overlap or either is unspecified."""
+    return iface_a is None or iface_b is None or iface_a == iface_b
 
 
 def rules_overlap(rule_a: FirewallRule, rule_b: FirewallRule) -> bool:
-    """Return True if the two rules can match at least one common packet.
-
-    Two rules overlap if, for every relevant matching field, the values are
-    compatible. A field is compatible when at least one of the rules leaves
-    it unspecified (treated as a wildcard) or both rules specify the same
-    value for that field.
-    """
-    fields = [
-        "protocol", "src", "dst",
-        "src_port", "dst_port",
-        "in_iface", "out_iface"
-    ]
-
-    for field in fields:
-        a = getattr(rule_a, field)
-        b = getattr(rule_b, field)
-
-        # If both rules specify this field and the values differ then the
-        # rules cannot match the same packet for this attribute.
-        if a is not None and b is not None and a != b:
-            return False
-
-    # No conflicting field was found, so there exists at least one packet
-    # that both rules could match (i.e., they overlap).
-    return True
+    """Return True if two rules overlap in match criteria."""
+    return (
+        ip_overlap(rule_a.src, rule_b.src) and
+        ip_overlap(rule_a.dst, rule_b.dst) and
+        port_overlap(rule_a.src_port, rule_b.src_port) and
+        port_overlap(rule_a.dst_port, rule_b.dst_port) and
+        (rule_a.protocol is None or rule_b.protocol is None or rule_a.protocol == rule_b.protocol) and
+        interfaces_overlap(rule_a.in_iface, rule_b.in_iface) and
+        interfaces_overlap(rule_a.out_iface, rule_b.out_iface)
+    )
 
 
-def rule_covers(rule_a: FirewallRule, rule_b: FirewallRule) -> bool:
-    """Return True if `rule_a` covers `rule_b`.
-
-    A rule A "covers" rule B when every field specified in A equals the
-    corresponding field in B. Fields unspecified (None) in A are treated as
-    wildcards and therefore are compatible with any value in B. In other
-    words, A's match set is a superset (or equal) of B's match set.
-    """
-    fields = [
-        "protocol", "src", "dst",
-        "src_port", "dst_port",
-        "in_iface", "out_iface"
-    ]
-
-    for field in fields:
-        a = getattr(rule_a, field)
-        b = getattr(rule_b, field)
-
-        # If rule A specifies a value for this field and it does not equal
-        # the corresponding value in rule B, then A does not cover B.
-        if a is not None and a != b:
-            return False
-
-    return True
+def rule_conflicts(rule_a: FirewallRule, rule_b: FirewallRule) -> bool:
+    """Return True if two rules conflict: they overlap but have different actions."""
+    if rule_a.action == rule_b.action:
+        return False  # same action is not a conflict
+    if shadowing.rule_covers(rule_a, rule_b) or shadowing.rule_covers(rule_b, rule_a):
+        return False  # shadowed rules are not counted as conflicts
+    return rules_overlap(rule_a, rule_b)
 
 
-def detect_conflicting_rules(
-    rules: List[FirewallRule]
-) -> List[Tuple[FirewallRule, FirewallRule]]:
-    """Detect pairs of rules that are likely in conflict.
+def detect_conflicting_rules(rules: List[FirewallRule]) -> List[Tuple[FirewallRule, FirewallRule]]:
+    """Return a list of all pairs of conflicting rules."""
+    conflicts_list: List[Tuple[FirewallRule, FirewallRule]] = []
 
-    Two rules are considered conflicting if all of the following hold:
-    - they belong to the same `table` and `chain`,
-    - they have different `action` (e.g., ACCEPT vs DROP),
-    - their match sets overlap (`rules_overlap`), and
-    - neither rule covers the other (preventing simple shadowing/ordering
-      differences from being reported as conflicts).
+    n = len(rules)
+    for i in range(n):
+        for j in range(i + 1, n):
+            r1 = rules[i]
+            r2 = rules[j]
 
-    Returns a list of tuples (rule1, rule2) for each detected conflict.
-    """
-    conflicts = []
+            # Only check rules in the same table/chain
+            if r1.table != r2.table or r1.chain != r2.chain:
+                continue
 
-    for i, r1 in enumerate(rules):
-        for r2 in rules[i + 1:]:
-            # Check same context (table and chain) and differing actions.
-            if (
-                r1.table == r2.table
-                and r1.chain == r2.chain
-                and r1.action != r2.action
-                # Rules must be able to match the same packet(s).
-                and rules_overlap(r1, r2)
-                # Exclude cases where one rule logically covers the other
-                # (these are handled as shadowing/redundancy elsewhere).
-                and not rule_covers(r1, r2)
-                and not rule_covers(r2, r1)
-            ):
-                conflicts.append((r1, r2))
+            if rule_conflicts(r1, r2):
+                conflicts_list.append((r1, r2))
 
-    return conflicts
+    return conflicts_list
