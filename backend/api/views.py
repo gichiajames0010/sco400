@@ -42,8 +42,8 @@ class AnalyzeRulesView(APIView):
             ],
             "conflicts": [
                 {
-                    "rule_1": serialize_rule(r1),
-                    "rule_2": serialize_rule(r2)
+                    "rule1": serialize_rule(r1),
+                    "rule2": serialize_rule(r2)
                 }
                 for r1, r2 in detect_conflicting_rules(rules)
             ],

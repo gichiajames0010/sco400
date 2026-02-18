@@ -5,10 +5,25 @@ from core.models.firewall_rule import FirewallRule
 import ipaddress
 
 
+def port_covers(val_a, val_b) -> bool:
+    """Return True if port/range val_a covers port/range val_b."""
+    if val_a is None:
+        return True  # wildcard covers everything
+    if val_b is None:
+        return False # specific cannot cover wildcard
+
+    # Normalize to tuple (start, end)
+    range_a = (val_a, val_a) if isinstance(val_a, int) else val_a
+    range_b = (val_b, val_b) if isinstance(val_b, int) else val_b
+
+    return range_a[0] <= range_b[0] and range_a[1] >= range_b[1]
+
+
 def field_covers(val_a, val_b) -> bool:
     """Check if field in rule_a covers the field in rule_b.
 
     - For IP networks, rule_a covers rule_b if rule_b is a subnet of rule_a.
+    - For ports, check range inclusion.
     - For other fields, coverage means either wildcard (None) or exact match.
     """
     if isinstance(val_a, (ipaddress.IPv4Network, ipaddress.IPv6Network)):
@@ -16,6 +31,11 @@ def field_covers(val_a, val_b) -> bool:
             # a specific network cannot cover a wildcard
             return False
         return val_b.subnet_of(val_a)
+    
+    # Check for ports/ranges (int or tuple)
+    if isinstance(val_a, (int, tuple)) or isinstance(val_b, (int, tuple)):
+        return port_covers(val_a, val_b)
+
     # If rule_a does not specify the field, it covers any value
     if val_a is None:
         return True

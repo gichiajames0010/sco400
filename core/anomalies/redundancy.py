@@ -3,6 +3,10 @@
 from typing import List, Tuple
 from core.models.firewall_rule import FirewallRule
 import ipaddress
+from core.anomalies.shadowing import port_covers
+
+
+
 
 
 def is_field_equal(a, b):
@@ -27,8 +31,8 @@ def rules_match(new_rule: FirewallRule, existing_rule: FirewallRule) -> bool:
         is_field_equal(new_rule.protocol, existing_rule.protocol) and
         is_network_redundant(new_rule.src, existing_rule.src) and
         is_network_redundant(new_rule.dst, existing_rule.dst) and
-        is_field_equal(new_rule.src_port, existing_rule.src_port) and
-        is_field_equal(new_rule.dst_port, existing_rule.dst_port) and
+        port_covers(existing_rule.src_port, new_rule.src_port) and
+        port_covers(existing_rule.dst_port, new_rule.dst_port) and
         is_field_equal(new_rule.in_iface, existing_rule.in_iface) and
         is_field_equal(new_rule.out_iface, existing_rule.out_iface) and
         is_field_equal(new_rule.action, existing_rule.action)
