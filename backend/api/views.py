@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from core.parsers.iptables_parser import IptablesParser
+from core.parsers.nftables_parser import NftablesParser
 from core.anomalies.redundancy import detect_redundant_rules
 from core.anomalies.shadowing import detect_shadowed_rules
 from core.anomalies.conflicts import detect_conflicting_rules
@@ -20,7 +21,12 @@ class AnalyzeRulesView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        parser = IptablesParser()
+        # Auto-detect parser
+        if "table" in rules_text and "{" in rules_text:
+            parser = NftablesParser()
+        else:
+            parser = IptablesParser()
+
         rules = parser.parse(rules_text)
 
         def serialize_rule(rule):

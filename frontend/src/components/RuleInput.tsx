@@ -93,11 +93,11 @@ COMMIT`;
           <div>
             <h2 className="section-title">Firewall Rules Input</h2>
             <p className="section-subtitle">
-              Paste your iptables rules or upload a configuration file
+              Paste your iptables/nftables rules or upload a configuration file
             </p>
           </div>
         </div>
-        
+
         {/* File Upload Button */}
         <button
           onClick={handleUploadClick}
@@ -128,7 +128,7 @@ COMMIT`;
           className="cyber-input w-full h-64 p-4 font-mono text-sm resize-y scrollbar-cyber"
           disabled={isLoading}
         />
-        
+
         {/* Line count indicator */}
         <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
           {rules.split('\n').filter(line => line.trim()).length} lines

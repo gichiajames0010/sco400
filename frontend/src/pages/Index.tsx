@@ -15,7 +15,7 @@ import { analyzeRules, AnalysisResponse } from '../services/api';
 const Index = () => {
   // State for analysis results
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
-  
+
   // Loading and error states
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,13 +27,13 @@ const Index = () => {
   const handleAnalyze = async (rules: string) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const result = await analyzeRules(rules);
       setAnalysisResult(result);
     } catch (err) {
-      const errorMessage = err instanceof Error 
-        ? err.message 
+      const errorMessage = err instanceof Error
+        ? err.message
         : 'An unexpected error occurred';
       setError(errorMessage);
       setAnalysisResult(null);
@@ -52,14 +52,14 @@ const Index = () => {
             <div className="p-2.5 bg-primary/10 rounded-xl">
               <Shield className="w-7 h-7 text-primary" />
             </div>
-            
+
             {/* Title */}
             <div>
               <h1 className="text-2xl font-bold text-gradient-cyber">
                 Firewall Rule Analyzer & Optimizer
               </h1>
               <p className="text-sm text-muted-foreground">
-                Analyze, detect anomalies, and optimize your iptables firewall rules
+                Analyze, detect anomalies, and optimize your iptables or nftables firewall rules
               </p>
             </div>
 
@@ -129,7 +129,7 @@ const Index = () => {
               Ready to Analyze
             </h3>
             <p className="text-muted-foreground max-w-md mx-auto">
-              Paste your iptables firewall rules above or upload a configuration file to begin analysis. 
+              Paste your iptables or nftables firewall rules above or upload a configuration file to begin analysis.
               The system will detect anomalies and generate an optimized ruleset.
             </p>
           </div>
@@ -140,8 +140,8 @@ const Index = () => {
       <footer className="border-t border-border mt-auto">
         <div className="container mx-auto px-6 py-4">
           <p className="text-center text-sm text-muted-foreground">
-            Firewall Rule Analysis and Optimization System • 
-            Built for Linux iptables administration
+            Firewall Rule Analysis and Optimization System •
+            Built for Linux iptables & nftables administration
           </p>
         </div>
       </footer>
