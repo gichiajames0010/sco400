@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, AlertCircle, Wifi } from 'lucide-react';
 import { RuleInput } from '../components/RuleInput';
 import { MetricsDisplay } from '../components/MetricsDisplay';
 import { AnomalyTables } from '../components/AnomalyTables';
 import { OptimizedRules } from '../components/OptimizedRules';
-import { analyzeRules, AnalysisResponse } from '../services/api';
+import { HistoryList } from '../components/HistoryList';
+import { analyzeRules, AnalysisResponse, getHistory, AnalysisSession } from '../services/api';
 
 /**
  * Main Dashboard Page
@@ -15,10 +16,29 @@ import { analyzeRules, AnalysisResponse } from '../services/api';
 const Index = () => {
   // State for analysis results
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
+  const [history, setHistory] = useState<AnalysisSession[]>([]);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
 
   // Loading and error states
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Fetch history on mount
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  async function fetchHistory() {
+    setIsHistoryLoading(true);
+    try {
+      const data = await getHistory();
+      setHistory(data);
+    } catch (err) {
+      console.error('Failed to load history:', err);
+    } finally {
+      setIsHistoryLoading(false);
+    }
+  }
 
   /**
    * Handles the rule analysis process
@@ -31,6 +51,7 @@ const Index = () => {
     try {
       const result = await analyzeRules(rules);
       setAnalysisResult(result);
+      fetchHistory(); // Refresh history after new analysis
     } catch (err) {
       const errorMessage = err instanceof Error
         ? err.message
@@ -76,64 +97,78 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-8 space-y-8">
-        {/* Rule Input Section */}
-        <section>
-          <RuleInput onAnalyze={handleAnalyze} isLoading={isLoading} />
-        </section>
+      <main className="container mx-auto px-6 py-8">
+        <div className="grid lg:grid-cols-4 gap-8">
 
-        {/* Error Display */}
-        {error && (
-          <div className="cyber-card border-destructive/50 bg-destructive/5 p-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-medium text-destructive">Analysis Error</h3>
-                <p className="text-sm text-muted-foreground mt-1">{error}</p>
+          {/* Left Column: Input & Results (3/4 width) */}
+          <div className="lg:col-span-3 space-y-8">
+            {/* Rule Input Section */}
+            <section>
+              <RuleInput onAnalyze={handleAnalyze} isLoading={isLoading} />
+            </section>
+
+            {/* Error Display */}
+            {error && (
+              <div className="cyber-card border-destructive/50 bg-destructive/5 p-4">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-medium text-destructive">Analysis Error</h3>
+                    <p className="text-sm text-muted-foreground mt-1">{error}</p>
+                  </div>
+                </div>
               </div>
+            )}
+
+            {/* Analysis Results */}
+            {analysisResult && (
+              <>
+                {/* Metrics Section */}
+                <section>
+                  <MetricsDisplay metrics={analysisResult.metrics} />
+                </section>
+
+                {/* Anomaly Analysis Section */}
+                <section>
+                  <AnomalyTables
+                    redundantRules={analysisResult.redundant_rules}
+                    shadowedRules={analysisResult.shadowed_rules}
+                    conflicts={analysisResult.conflicts}
+                  />
+                </section>
+
+                {/* Optimized Rules Section */}
+                <section>
+                  <OptimizedRules rules={analysisResult.optimized_rules} />
+                </section>
+              </>
+            )}
+
+            {/* Empty State - No Analysis Yet */}
+            {!analysisResult && !error && !isLoading && (
+              <div className="cyber-card p-12 text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-muted rounded-full mb-4">
+                  <Shield className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium text-foreground mb-2">
+                  Ready to Analyze
+                </h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  Paste your iptables or nftables firewall rules above or upload a configuration file to begin analysis.
+                  The system will detect anomalies and generate an optimized ruleset.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: History (1/4 width) */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24">
+              <HistoryList history={history} isLoading={isHistoryLoading} />
             </div>
           </div>
-        )}
 
-        {/* Analysis Results */}
-        {analysisResult && (
-          <>
-            {/* Metrics Section */}
-            <section>
-              <MetricsDisplay metrics={analysisResult.metrics} />
-            </section>
-
-            {/* Anomaly Analysis Section */}
-            <section>
-              <AnomalyTables
-                redundantRules={analysisResult.redundant_rules}
-                shadowedRules={analysisResult.shadowed_rules}
-                conflicts={analysisResult.conflicts}
-              />
-            </section>
-
-            {/* Optimized Rules Section */}
-            <section>
-              <OptimizedRules rules={analysisResult.optimized_rules} />
-            </section>
-          </>
-        )}
-
-        {/* Empty State - No Analysis Yet */}
-        {!analysisResult && !error && !isLoading && (
-          <div className="cyber-card p-12 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-muted rounded-full mb-4">
-              <Shield className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-medium text-foreground mb-2">
-              Ready to Analyze
-            </h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Paste your iptables or nftables firewall rules above or upload a configuration file to begin analysis.
-              The system will detect anomalies and generate an optimized ruleset.
-            </p>
-          </div>
-        )}
+        </div>
       </main>
 
       {/* Footer */}

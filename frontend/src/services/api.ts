@@ -82,6 +82,31 @@ export async function analyzeRules(rules: string): Promise<AnalysisResponse> {
   }
 }
 
+
+export interface AnalysisSession {
+  id: string;
+  created_at: string;
+  rule_type: 'iptables' | 'nftables';
+  total_rules: number;
+  redundant_count: number;
+  shadowed_count: number;
+  conflict_count: number;
+  optimized_count: number;
+}
+
+/**
+ * Fetches analysis history from the backend
+ * 
+ * @returns Promise containing list of past analysis sessions
+ */
+export async function getHistory(): Promise<AnalysisSession[]> {
+  const response = await fetch(`${API_BASE_URL}/api/history/`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch history');
+  }
+  return response.json();
+}
+
 /**
  * Generates a downloadable text file from optimized rules
  * 
@@ -110,3 +135,4 @@ export function downloadRulesFile(rules: FirewallRule[], filename: string = 'opt
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
+
