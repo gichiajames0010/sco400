@@ -1,3 +1,11 @@
+/**
+ * OptimizedRules — displays the pruned ruleset produced by the backend optimizer.
+ *
+ * The optimized ruleset is the original input with all redundant and shadowed
+ * rules removed.  Rules are presented in their original execution order inside
+ * a syntax-highlighted terminal-style panel.  A download button lets the user
+ * export the result as a plain-text file compatible with `iptables-restore`.
+ */
 import { CheckCircle, Download, Terminal } from 'lucide-react';
 import type { FirewallRule } from '../services/api';
 import { downloadRulesFile } from '../services/api';
@@ -64,7 +72,7 @@ export function OptimizedRules({ rules }: OptimizedRulesProps) {
               <table className="w-full">
                 <tbody className="font-mono text-sm">
                   {rules.map((rule, index) => (
-                    <tr 
+                    <tr
                       key={`opt-${index}`}
                       className="border-b border-border/50 last:border-b-0 hover:bg-muted/20 transition-colors"
                     >
@@ -72,7 +80,7 @@ export function OptimizedRules({ rules }: OptimizedRulesProps) {
                       <td className="px-4 py-2 text-muted-foreground text-right w-16 select-none border-r border-border/30">
                         {rule.order}
                       </td>
-                      
+
                       {/* Rule Content */}
                       <td className="px-4 py-2 text-foreground whitespace-pre overflow-x-auto">
                         {rule.raw}

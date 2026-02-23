@@ -86,7 +86,21 @@ class NftablesParser:
         return rules
 
     def _parse_rule(self, line: str, table: str, chain: str, order: int) -> Optional[FirewallRule]:
-        """Parse a single rule line."""
+        """Parse a single nftables rule line into a FirewallRule object.
+        
+        This method tokenizes the rule line and extracts semantic fields such as
+        protocol, source/destination IPs, ports, interfaces, and actions.
+        
+        Args:
+            line: The raw rule string.
+            table: The table name the rule belongs to.
+            chain: The chain name the rule belongs to.
+            order: The generic order/priority index of the rule.
+            
+        Returns:
+            A FirewallRule object if the line represents a valid rule with an action,
+            otherwise None.
+        """
         tokens = line.split()
         
         protocol: Optional[str] = None
@@ -98,7 +112,8 @@ class NftablesParser:
         out_iface: Optional[str] = None
         action: Optional[str] = None
 
-        # Simple token consumption loop
+        # Simple token consumption loop to parse the space-separated nftables syntax.
+        # This is a simplified parser and may not cover all complex nftables expressions.
         i = 0
         while i < len(tokens):
             token = tokens[i]

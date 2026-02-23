@@ -1,10 +1,20 @@
-import { 
-  Layers, 
-  Copy, 
-  EyeOff, 
-  AlertTriangle, 
-  CheckCircle, 
-  TrendingDown 
+/**
+ * MetricsDisplay — renders a grid of metric cards summarising the analysis.
+ *
+ * Each card shows one of the six metrics returned by the backend:
+ *   total_rules, redundant_rules, shadowed_rules, conflicting_pairs,
+ *   optimized_rule_count, and reduction_ratio.
+ *
+ * Cards are configured via an array so adding a new metric requires
+ * only appending a single entry to the `cards` array.
+ */
+import {
+  Layers,
+  Copy,
+  EyeOff,
+  AlertTriangle,
+  CheckCircle,
+  TrendingDown
 } from 'lucide-react';
 import type { RuleMetrics } from '../services/api';
 
@@ -33,28 +43,32 @@ export function MetricsDisplay({ metrics }: MetricsDisplayProps) {
     },
     {
       label: 'Redundant Rules',
-      value: metrics.redundant_count,
+      // redundant_rules: rules fully covered by an earlier rule with the same action
+      value: metrics.redundant_rules,
       icon: Copy,
       color: 'text-warning',
       bgColor: 'bg-warning/10',
     },
     {
       label: 'Shadowed Rules',
-      value: metrics.shadowed_count,
+      // shadowed_rules: unreachable rules covered by an earlier rule with a different action
+      value: metrics.shadowed_rules,
       icon: EyeOff,
       color: 'text-muted-foreground',
       bgColor: 'bg-muted',
     },
     {
       label: 'Conflicting Rules',
-      value: metrics.conflict_count,
+      // conflicting_pairs: count of rule pairs with overlapping traffic but opposing actions
+      value: metrics.conflicting_pairs,
       icon: AlertTriangle,
       color: 'text-destructive',
       bgColor: 'bg-destructive/10',
     },
     {
       label: 'Optimized Count',
-      value: metrics.optimized_count,
+      // optimized_rule_count: rules remaining after redundant/shadowed rules are removed
+      value: metrics.optimized_rule_count,
       icon: CheckCircle,
       color: 'text-success',
       bgColor: 'bg-success/10',
@@ -91,12 +105,12 @@ export function MetricsDisplay({ metrics }: MetricsDisplayProps) {
             <div className={`p-2 ${card.bgColor} rounded-lg w-fit`}>
               <card.icon className={`w-5 h-5 ${card.color}`} />
             </div>
-            
+
             {/* Value */}
             <div className={`text-2xl font-bold ${card.color}`}>
               {card.value}
             </div>
-            
+
             {/* Label */}
             <div className="text-sm text-muted-foreground">
               {card.label}

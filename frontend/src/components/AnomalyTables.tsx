@@ -1,3 +1,17 @@
+/**
+ * AnomalyTables — displays the three anomaly panels returned by the backend:
+ *   • Redundant Rules  — rules whose traffic is fully handled by an earlier rule
+ *                        with the same action.
+ *   • Shadowed Rules   — rules that are unreachable because an earlier rule
+ *                        with a *different* action covers the same traffic.
+ *   • Rule Conflicts   — pairs of rules that overlap in match criteria but
+ *                        have opposing actions (e.g. ACCEPT vs DROP).
+ *
+ * Sub-components:
+ *   RuleRow      — render a single rule with chain/action badges.
+ *   ConflictPair — render two conflicting rules side-by-side.
+ *   EmptyState   — placeholder shown when a panel has zero entries.
+ */
 import { Copy, EyeOff, AlertTriangle, ChevronRight } from 'lucide-react';
 import type { FirewallRule, RuleConflict } from '../services/api';
 
@@ -22,20 +36,19 @@ function RuleRow({ rule }: { rule: FirewallRule }) {
             #{rule.order}
           </span>
         </div>
-        
+
         {/* Rule Details */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2 py-0.5 text-xs font-medium bg-secondary rounded">
               {rule.chain}
             </span>
-            <span className={`px-2 py-0.5 text-xs font-medium rounded ${
-              rule.action === 'ACCEPT' 
-                ? 'bg-success/20 text-success' 
+            <span className={`px-2 py-0.5 text-xs font-medium rounded ${rule.action === 'ACCEPT'
+                ? 'bg-success/20 text-success'
                 : rule.action === 'DROP' || rule.action === 'REJECT'
-                ? 'bg-destructive/20 text-destructive'
-                : 'bg-muted text-muted-foreground'
-            }`}>
+                  ? 'bg-destructive/20 text-destructive'
+                  : 'bg-muted text-muted-foreground'
+              }`}>
               {rule.action}
             </span>
           </div>
@@ -66,11 +79,10 @@ function ConflictPair({ conflict }: { conflict: RuleConflict }) {
             <span className="px-2 py-0.5 text-xs font-medium bg-secondary rounded">
               {conflict.rule1.chain}
             </span>
-            <span className={`px-2 py-0.5 text-xs font-medium rounded ${
-              conflict.rule1.action === 'ACCEPT' 
-                ? 'bg-success/20 text-success' 
+            <span className={`px-2 py-0.5 text-xs font-medium rounded ${conflict.rule1.action === 'ACCEPT'
+                ? 'bg-success/20 text-success'
                 : 'bg-destructive/20 text-destructive'
-            }`}>
+              }`}>
               {conflict.rule1.action}
             </span>
           </div>
@@ -93,11 +105,10 @@ function ConflictPair({ conflict }: { conflict: RuleConflict }) {
             <span className="px-2 py-0.5 text-xs font-medium bg-secondary rounded">
               {conflict.rule2.chain}
             </span>
-            <span className={`px-2 py-0.5 text-xs font-medium rounded ${
-              conflict.rule2.action === 'ACCEPT' 
-                ? 'bg-success/20 text-success' 
+            <span className={`px-2 py-0.5 text-xs font-medium rounded ${conflict.rule2.action === 'ACCEPT'
+                ? 'bg-success/20 text-success'
                 : 'bg-destructive/20 text-destructive'
-            }`}>
+              }`}>
               {conflict.rule2.action}
             </span>
           </div>
@@ -106,7 +117,7 @@ function ConflictPair({ conflict }: { conflict: RuleConflict }) {
           </code>
         </div>
       </div>
-      
+
       {/* Conflict Reason */}
       {conflict.reason && (
         <div className="mt-3 text-xs text-muted-foreground italic">
