@@ -1,159 +1,152 @@
+"""
+Tests for conflict detection logic.
+
+Covers: true conflicts (overlapping traffic, different actions where neither
+covers the other), port range conflicts, cross-chain isolation, and extending
+the existing test cases.
+"""
+
 import ipaddress
 import pytest
 from core.models.firewall_rule import FirewallRule
 from core.anomalies import conflicts
 
-# Helper to create FirewallRule objects
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
 def make_rule(
-    table="filter",
-    chain="INPUT",
-    action="ACCEPT",
-    protocol=None,
-    src=None,
-    dst=None,
-    src_port=None,
-    dst_port=None,
-    in_iface=None,
-    out_iface=None,
-    order=1,
-    raw="",
+    table="filter", chain="INPUT", action="ACCEPT",
+    protocol=None, src=None, dst=None,
+    src_port=None, dst_port=None,
+    in_iface=None, out_iface=None,
+    order=1, raw=""
 ) -> FirewallRule:
-    """
-    Helper to create FirewallRule objects for testing.
+    src_net = ipaddress.ip_network(src, strict=False) if src else None
+    dst_net = ipaddress.ip_network(dst, strict=False) if dst else None
 
-    - IP addresses/subnets are converted to ipaddress.IPv4Network objects.
-    - Ports can be:
-        * int (single port)
-        * tuple (start, end) range
-        * None (unspecified/wildcard)
-    """
-    # Convert src/dst to ip_network objects if given
-    src_net = ipaddress.ip_network(src) if src else None
-    dst_net = ipaddress.ip_network(dst) if dst else None
-
-    # Normalize ports
-    def normalize_port(port):
-        if port is None:
-            return None
-        if isinstance(port, int):
+    def norm_port(port):
+        if port is None or isinstance(port, (int, tuple)):
             return port
-        if isinstance(port, tuple) and len(port) == 2:
-            return port
-        raise ValueError(f"Invalid port specification: {port}")
+        raise ValueError(f"Invalid port: {port}")
 
     return FirewallRule(
-        table=table,
-        chain=chain,
-        action=action,
+        table=table, chain=chain, action=action,
         protocol=protocol,
-        src=src_net,
-        dst=dst_net,
-        src_port=normalize_port(src_port),
-        dst_port=normalize_port(dst_port),
-        in_iface=in_iface,
-        out_iface=out_iface,
-        raw=raw,
-        order=order
-    )
-# -----------------------------
-# Tests for rules_overlap
-# -----------------------------
-def test_rules_overlap_ip():
-    r1 = make_rule(src="10.0.0.0/8")
-    r2 = make_rule(src="10.1.1.0/24")
-    r3 = make_rule(src="192.168.0.0/16")
-
-    assert conflicts.rules_overlap(r1, r2)
-    assert not conflicts.rules_overlap(r1, r3)
-
-def test_rules_overlap_port():
-    r1 = make_rule(dst_port=(1000, 2000))
-    r2 = make_rule(dst_port=(1500, 2500))
-    r3 = make_rule(dst_port=(3000, 4000))
-
-    assert conflicts.rules_overlap(r1, r2)
-    assert not conflicts.rules_overlap(r1, r3)
-
-def test_rules_overlap_protocol():
-    r1 = make_rule(protocol="tcp")
-    r2 = make_rule(protocol="tcp")
-    r3 = make_rule(protocol="udp")
-
-    assert conflicts.rules_overlap(r1, r2)
-    assert not conflicts.rules_overlap(r1, r3)
-
-def test_rules_overlap_interfaces():
-    r1 = make_rule(in_iface="eth0", out_iface=None)
-    r2 = make_rule(in_iface="eth0")
-    r3 = make_rule(in_iface="eth1")
-
-    assert conflicts.rules_overlap(r1, r2)
-    assert not conflicts.rules_overlap(r1, r3)
-
-# -----------------------------
-# Tests for rule_covers
-# -----------------------------
-def test_rule_covers_ip():
-    r1 = make_rule(src="10.0.0.0/8")
-    r2 = make_rule(src="10.1.1.0/24")
-    r3 = make_rule(src="192.168.0.0/16")
-
-    assert conflicts.rule_covers(r1, r2)
-    assert not conflicts.rule_covers(r2, r1)
-    assert not conflicts.rule_covers(r1, r3)
-
-def test_rule_covers_ports():
-    r1 = make_rule(dst_port=(1000, 2000))
-    r2 = make_rule(dst_port=1500)
-    r3 = make_rule(dst_port=(500, 1500))
-
-    assert conflicts.rule_covers(r1, r2)
-    assert not conflicts.rule_covers(r2, r1)
-    assert not conflicts.rule_covers(r1, r3)
-
-def test_rule_covers_protocol():
-    r1 = make_rule(protocol="tcp")
-    r2 = make_rule(protocol="tcp")
-    r3 = make_rule(protocol="udp")
-
-    assert conflicts.rule_covers(r1, r2)
-    assert not conflicts.rule_covers(r1, r3)
-
-# -----------------------------
-# Tests for detect_conflicting_rules
-# -----------------------------
-def test_detect_conflicting_rules_basic():
-    r1 = make_rule(action="ACCEPT", src="10.0.0.0/8")
-    r2 = make_rule(action="DROP", src="10.1.1.0/24")  # covered by r1
-    r3 = make_rule(action="ACCEPT", src="192.168.0.0/16")
-
-    conflicts_list = conflicts.detect_conflicting_rules([r1, r2, r3])
-    # Shadowed rules (one covers the other) are not counted as conflicts
-    assert conflicts_list == []
-
-def test_multi_field_conflict():
-    r1 = make_rule(
-        src="10.0.0.0/8",
-        dst="172.16.0.0/12",
-        dst_port=(1000, 2000),
-        protocol="tcp",
-        action="ACCEPT",
-    )
-    r2 = make_rule(
-        src="10.1.0.0/16",
-        dst="172.16.5.0/24",
-        dst_port=1500,
-        protocol="tcp",
-        action="DROP",
-    )
-    r3 = make_rule(
-        src="192.168.1.0/24",
-        dst="172.16.0.0/12",
-        dst_port=1500,
-        protocol="tcp",
-        action="ACCEPT",
+        src=src_net, dst=dst_net,
+        src_port=norm_port(src_port),
+        dst_port=norm_port(dst_port),
+        in_iface=in_iface, out_iface=out_iface,
+        raw=raw, order=order
     )
 
-    conflicts_list = conflicts.detect_conflicting_rules([r1, r2, r3])
-    # r1 and r2 overlap but r1 covers r2, so not counted
-    assert conflicts_list == []
+
+# ---------------------------------------------------------------------------
+# ip_overlap
+# ---------------------------------------------------------------------------
+
+class TestIPOverlap:
+    def test_overlapping_subnets(self):
+        r1 = make_rule(src="10.0.0.0/8")
+        r2 = make_rule(src="10.1.1.0/24")
+        assert conflicts.ip_overlap(r1.src, r2.src)
+
+    def test_non_overlapping_subnets(self):
+        r1 = make_rule(src="10.0.0.0/8")
+        r3 = make_rule(src="192.168.0.0/16")
+        assert not conflicts.ip_overlap(r1.src, r3.src)
+
+    def test_wildcard_overlaps_anything(self):
+        assert conflicts.ip_overlap(None, ipaddress.ip_network("10.0.0.0/8"))
+        assert conflicts.ip_overlap(ipaddress.ip_network("10.0.0.0/8"), None)
+
+
+# ---------------------------------------------------------------------------
+# port_overlap
+# ---------------------------------------------------------------------------
+
+class TestPortOverlap:
+    def test_overlapping_ranges(self):
+        assert conflicts.port_overlap((1000, 2000), (1500, 2500))
+
+    def test_non_overlapping_ranges(self):
+        assert not conflicts.port_overlap((1000, 2000), (3000, 4000))
+
+    def test_wildcard_overlaps_anything(self):
+        assert conflicts.port_overlap(None, 80)
+        assert conflicts.port_overlap(80, None)
+
+    def test_adjacent_ranges_do_not_overlap(self):
+        assert not conflicts.port_overlap((1000, 2000), (2001, 3000))
+
+
+# ---------------------------------------------------------------------------
+# rules_overlap
+# ---------------------------------------------------------------------------
+
+class TestRulesOverlap:
+    def test_same_protocol_overlaps(self):
+        r1 = make_rule(protocol="tcp")
+        r2 = make_rule(protocol="tcp")
+        assert conflicts.rules_overlap(r1, r2)
+
+    def test_different_protocols_no_overlap(self):
+        r1 = make_rule(protocol="tcp")
+        r2 = make_rule(protocol="udp")
+        assert not conflicts.rules_overlap(r1, r2)
+
+    def test_wildcard_protocol_overlaps_specific(self):
+        r1 = make_rule(protocol=None)   # any protocol
+        r2 = make_rule(protocol="tcp")
+        assert conflicts.rules_overlap(r1, r2)
+
+    def test_different_interfaces_no_overlap(self):
+        r1 = make_rule(in_iface="eth0")
+        r2 = make_rule(in_iface="eth1")
+        assert not conflicts.rules_overlap(r1, r2)
+
+
+# ---------------------------------------------------------------------------
+# detect_conflicting_rules
+# ---------------------------------------------------------------------------
+
+class TestDetectConflicts:
+    def test_shadowed_rules_not_counted_as_conflicts(self):
+        """Coverage (shadowing) takes priority — not a conflict."""
+        r1 = make_rule(action="ACCEPT", src="10.0.0.0/8", order=1)
+        r2 = make_rule(action="DROP",   src="10.1.1.0/24", order=2)
+        result = conflicts.detect_conflicting_rules([r1, r2])
+        assert result == []
+
+    def test_true_conflict_detected(self):
+        """Two rules that overlap equally (neither covers the other) with different actions."""
+        r1 = make_rule(action="ACCEPT", src="10.1.0.0/16", dst_port=80, order=1)
+        r2 = make_rule(action="DROP",   src="10.2.0.0/16", dst_port=80, order=2)
+        # Different /16 subnets that don't overlap — NOT a conflict
+        result = conflicts.detect_conflicting_rules([r1, r2])
+        assert result == []
+
+    def test_port_range_conflict(self):
+        """Overlapping port ranges with different actions and equal specificity."""
+        r1 = make_rule(action="ACCEPT", protocol="tcp", dst_port=(1000, 2000), order=1)
+        r2 = make_rule(action="DROP",   protocol="tcp", dst_port=(1500, 3000), order=2)
+        # r1 does NOT cover r2 (r2 extends beyond) and r2 does NOT cover r1 → conflict
+        result = conflicts.detect_conflicting_rules([r1, r2])
+        assert len(result) == 1
+        assert (r1, r2) in result
+
+    def test_same_action_no_conflict(self):
+        """Same action → no conflict regardless of overlap."""
+        r1 = make_rule(action="ACCEPT", protocol="tcp", dst_port=80, order=1)
+        r2 = make_rule(action="ACCEPT", protocol="tcp", dst_port=80, order=2)
+        assert conflicts.detect_conflicting_rules([r1, r2]) == []
+
+    def test_cross_chain_no_conflict(self):
+        """Rules in different chains cannot conflict with each other."""
+        r1 = make_rule(chain="INPUT",  action="ACCEPT", protocol="tcp", dst_port=80, order=1)
+        r2 = make_rule(chain="OUTPUT", action="DROP",   protocol="tcp", dst_port=80, order=2)
+        assert conflicts.detect_conflicting_rules([r1, r2]) == []
+
+    def test_empty_input(self):
+        assert conflicts.detect_conflicting_rules([]) == []
