@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, AlertCircle, Wifi } from 'lucide-react';
+import { Shield, AlertCircle, Wifi, Info, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { RuleInput } from '../components/RuleInput';
 import { MetricsDisplay } from '../components/MetricsDisplay';
 import { AnomalyTables } from '../components/AnomalyTables';
@@ -123,6 +123,48 @@ const Index = () => {
             {/* Analysis Results */}
             {analysisResult && (
               <>
+                {/* Feedback Message Banner */}
+                {analysisResult.message && (
+                  <div
+                    className={`cyber-card p-4 flex items-start gap-3 ${
+                      analysisResult.metrics.total_rules === 0
+                        ? 'border-blue-500/50 bg-blue-500/5'
+                        : analysisResult.redundant_rules.length === 0 &&
+                          analysisResult.shadowed_rules.length === 0 &&
+                          analysisResult.conflicts.length === 0
+                        ? 'border-emerald-500/50 bg-emerald-500/5'
+                        : 'border-amber-500/50 bg-amber-500/5'
+                    }`}
+                  >
+                    {analysisResult.metrics.total_rules === 0 ? (
+                      <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    ) : analysisResult.redundant_rules.length === 0 &&
+                      analysisResult.shadowed_rules.length === 0 &&
+                      analysisResult.conflicts.length === 0 ? (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                    )}
+                    <div>
+                      <h3
+                        className={`font-medium ${
+                          analysisResult.metrics.total_rules === 0
+                            ? 'text-blue-400'
+                            : analysisResult.redundant_rules.length === 0 &&
+                              analysisResult.shadowed_rules.length === 0 &&
+                              analysisResult.conflicts.length === 0
+                            ? 'text-emerald-400'
+                            : 'text-amber-400'
+                        }`}
+                      >
+                        Analysis Feedback
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {analysisResult.message}
+                      </p>
+                    </div>
+                  </div>
+                )}
                 {/* Metrics Section */}
                 <section>
                   <MetricsDisplay metrics={analysisResult.metrics} />

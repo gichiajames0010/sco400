@@ -83,7 +83,20 @@ class AnalyzeRulesView(APIView):
             parser = IptablesParser()
 
         # Parse the raw text into a list of FirewallRule dataclass instances.
-        rules = parser.parse(rules_text)
+        try:
+            rules = parser.parse(rules_text)
+        except Exception as exc:
+            return Response(
+                {
+                    "error": "Failed to parse firewall rules.",
+                    "details": str(exc),
+                    "message": (
+                        "The input could not be parsed. Please ensure it follows "
+                        "valid iptables-save or nftables syntax."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # Helper — convert a FirewallRule to a JSON-serialisable dict.
         def serialize_rule(rule):
@@ -137,6 +150,30 @@ class AnalyzeRulesView(APIView):
 
         # Include the new session UUID so the client can reference this run.
         response["session_id"] = str(session.id)
+
+        # Add interactive feedback message
+        if len(rules) == 0:
+            response['message'] = (
+                'No actionable rules were found in the input. '
+                'The configuration may contain only policy declarations or empty chains.'
+            )
+        elif not redundant and not shadowed and not conflicts:
+            response['message'] = (
+                'Analysis complete — no anomalies detected. '
+                'The provided rules are already optimal.'
+            )
+        else:
+            parts = []
+            if redundant:
+                parts.append(f'{len(redundant)} redundant')
+            if shadowed:
+                parts.append(f'{len(shadowed)} shadowed')
+            if conflicts:
+                parts.append(f'{len(conflicts)} conflicting pair(s)')
+            response['message'] = (
+                f'Optimisation opportunities found: {", ".join(parts)}. '
+                'Review the anomaly details below.'
+            )
 
         return Response(response, status=status.HTTP_200_OK)
 

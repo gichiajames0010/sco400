@@ -38,6 +38,8 @@ export interface AnalysisResponse {
   shadowed_rules: FirewallRule[];
   conflicts: RuleConflict[];
   optimized_rules: FirewallRule[];
+  message?: string;
+  session_id?: string;
 }
 
 export interface ApiError {
